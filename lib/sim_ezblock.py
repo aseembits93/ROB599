@@ -6,7 +6,7 @@ class ADC(I2C):
     ADDR=0x14                   # 扩展板的地址为0x14
 
     def __init__(self, chn):    # 参数，通道数，树莓派扩展板上有8个adc通道分别为"A0, A1, A2, A3, A4, A5, A6, A7"
-        super().__init__()
+        #super().__init__()
         if isinstance(chn, str):
             if chn.startswith("A"):     # 判断穿境来的参数是否为A开头，如果是，取A后面的数字出来
                 chn = int(chn[1:])
@@ -48,8 +48,9 @@ class Servo(object):
         super().__init__()
         self.pwm = pwm
         self.pwm.period(4095)
-        prescaler = int(float(self.pwm.CLOCK) /
-                        self.pwm._freq/self.pwm.period())
+        # prescaler = int(float(self.pwm.CLOCK) /
+        #                 self.pwm._freq/self.pwm.period())
+        prescaler = 1                        
         self.pwm.prescaler(prescaler)
         # self.angle(90)
 
@@ -159,19 +160,19 @@ class Pin(object):
             setup = value[2]
         else:
             setup = None
-        if isinstance(pin, str):
-            try:
-                self._board_name = pin
-                self._pin = self.dict()[pin]
-            except Exception as e:
-                print(e)
-                self._error('Pin should be in %s, not %s' %
-                            (self._dict.keys(), pin))
-        elif isinstance(pin, int):
-            self._pin = pin
-        else:
-            self._error('Pin should be in %s, not %s' %
-                        (self._dict.keys(), pin))
+        # if isinstance(pin, str):
+        #     try:
+        #         self._board_name = pin
+        #         self._pin = self.dict()[pin]
+        #     except Exception as e:
+        #         print(e)
+        #         self._error('Pin should be in %s, not %s' %
+        #                     (self._dict.keys(), pin))
+        # elif isinstance(pin, int):
+        #     self._pin = pin
+        # else:
+        #     self._error('Pin should be in %s, not %s' %
+        #                 (self._dict.keys(), pin))
         self._value = 0
         self.init(mode, pull=setup)
         # self._info("Pin init finished.")
@@ -219,16 +220,16 @@ class Pin(object):
             return value
 
     def on(self):
-        return self.value(1)
+        return 0#self.value(1)
 
     def off(self):
-        return self.value(0)
+        return 0#self.value(0)
 
     def high(self):
-        return self.on()
+        return 0#self.on()
 
     def low(self):
-        return self.off()
+        return 0#self.off()
 
     def mode(self, *value):
         if len(value) == 0:
@@ -292,29 +293,30 @@ A file based database, read and write arguements in the specific file.
 
     def get(self, name, default_value=None):
         """Get value by data's name. Default value is for the arguemants do not exist"""
-        try:
-            conf = open(self.db, 'r')
-            lines = conf.readlines()
-            conf.close()
-            file_len = len(lines)-1
-            flag = False
-            # Find the arguement and set the value
-            for i in range(file_len):
-                if lines[i][0] != '#':
-                    if lines[i].split('=')[0].strip() == name:
-                        value = lines[i].split('=')[1].replace(' ', '').strip()
-                        flag = True
-            if flag:
-                return value
-            else:
-                return default_value
-        except FileNotFoundError:
-            conf = open(self.db, 'w')
-            conf.write("")
-            conf.close()
-            return default_value
-        except:
-            return default_value
+        # try:
+        #     conf = open(self.db, 'r')
+        #     lines = conf.readlines()
+        #     conf.close()
+        #     file_len = len(lines)-1
+        #     flag = False
+        #     # Find the arguement and set the value
+        #     for i in range(file_len):
+        #         if lines[i][0] != '#':
+        #             if lines[i].split('=')[0].strip() == name:
+        #                 value = lines[i].split('=')[1].replace(' ', '').strip()
+        #                 flag = True
+        #     if flag:
+        #         return value
+        #     else:
+        #         return default_value
+        # except FileNotFoundError:
+        #     conf = open(self.db, 'w')
+        #     conf.write("")
+        #     conf.close()
+        #     return default_value
+        # except:
+        #     return default_value
+        return default_value
 
     def set(self, name, value):
         """Set value by data's name. Or create one if the arguement does not exist"""
@@ -359,25 +361,25 @@ class PWM(I2C):
     CLOCK = 72000000
 
     def __init__(self, channel, debug="critical"):
-        super().__init__()
+        #super().__init__()
         if isinstance(channel, str):
             if channel.startswith("P"):
                 channel = int(channel[1:])
             else:
                 raise ValueError(
                     "PWM channel should be between [P1, P14], not {0}".format(channel))
-        try:
-            self.send(0x2C, self.ADDR)
-            self.send(0, self.ADDR)
-            self.send(0, self.ADDR)
-        except IOError:
-            self.ADDR = 0x15
+        # try:
+        #     self.send(0x2C, self.ADDR)
+        #     self.send(0, self.ADDR)
+        #     self.send(0, self.ADDR)
+        # except IOError:
+        #     self.ADDR = 0x15
 
         self.debug = debug
         # self._debug("PWM address: {:02X}".format(self.ADDR))
         self.channel = channel
         self.timer = int(channel/4)
-        self.bus = smbus.SMBus(1)
+        #self.bus = smbus.SMBus(1)
         self._pulse_width = 0
         self._freq = 50
         self.freq(50)
@@ -389,58 +391,62 @@ class PWM(I2C):
         self.send([reg, value_h, value_l], self.ADDR)
 
     def freq(self, *freq):
-        if len(freq) == 0:
-            return self._freq
-        else:
-            self._freq = int(freq[0])
-            # [prescaler,arr] list
-            result_ap = []
-            # accuracy list
-            result_acy = []
-            # middle value for equal arr prescaler
-            st = int(math.sqrt(self.CLOCK/self._freq))
-            # get -5 value as start
-            st -= 5
-            # prevent negetive value
-            if st <= 0:
-                st = 1
-            for psc in range(st, st+10):
-                arr = int(self.CLOCK/self._freq/psc)
-                result_ap.append([psc, arr])
-                result_acy.append(abs(self._freq-self.CLOCK/psc/arr))
-            i = result_acy.index(min(result_acy))
-            psc = result_ap[i][0]
-            arr = result_ap[i][1]
-            # self._debug("prescaler: %s, period: %s"%(psc, arr))
-            self.prescaler(psc)
-            self.period(arr)
+        # if len(freq) == 0:
+        #     return self._freq
+        # else:
+        #     self._freq = int(freq[0])
+        #     # [prescaler,arr] list
+        #     result_ap = []
+        #     # accuracy list
+        #     result_acy = []
+        #     # middle value for equal arr prescaler
+        #     st = int(math.sqrt(self.CLOCK/self._freq))
+        #     # get -5 value as start
+        #     st -= 5
+        #     # prevent negetive value
+        #     if st <= 0:
+        #         st = 1
+        #     for psc in range(st, st+10):
+        #         arr = int(self.CLOCK/self._freq/psc)
+        #         result_ap.append([psc, arr])
+        #         result_acy.append(abs(self._freq-self.CLOCK/psc/arr))
+        #     i = result_acy.index(min(result_acy))
+        #     psc = result_ap[i][0]
+        #     arr = result_ap[i][1]
+        #     # self._debug("prescaler: %s, period: %s"%(psc, arr))
+        #     self.prescaler(psc)
+        #     self.period(arr)
+        pass    
 
     def prescaler(self, *prescaler):
-        if len(prescaler) == 0:
-            return self._prescaler
-        else:
-            self._prescaler = int(prescaler[0]) - 1
-            reg = self.REG_PSC + self.timer
-            # self._debug("Set prescaler to: %s"%self._prescaler)
-            self.i2c_write(reg, self._prescaler)
+        # if len(prescaler) == 0:
+        #     return self._prescaler
+        # else:
+        #     self._prescaler = int(prescaler[0]) - 1
+        #     reg = self.REG_PSC + self.timer
+        #     # self._debug("Set prescaler to: %s"%self._prescaler)
+        #     self.i2c_write(reg, self._prescaler)
+        return 1    
 
     def period(self, *arr):
-        global timer
-        if len(arr) == 0:
-            return timer[self.timer]["arr"]
-        else:
-            timer[self.timer]["arr"] = int(arr[0]) - 1
-            reg = self.REG_ARR + self.timer
-            # self._debug("Set arr to: %s"%timer[self.timer]["arr"])
-            self.i2c_write(reg, timer[self.timer]["arr"])
+        # global timer
+        # if len(arr) == 0:
+        #     return timer[self.timer]["arr"]
+        # else:
+        #     timer[self.timer]["arr"] = int(arr[0]) - 1
+        #     reg = self.REG_ARR + self.timer
+        #     # self._debug("Set arr to: %s"%timer[self.timer]["arr"])
+        #     self.i2c_write(reg, timer[self.timer]["arr"])
+        return 0
 
     def pulse_width(self, *pulse_width):
-        if len(pulse_width) == 0:
-            return self._pulse_width
-        else:
-            self._pulse_width = int(pulse_width[0])
-            reg = self.REG_CHN + self.channel
-            self.i2c_write(reg, self._pulse_width)
+        # if len(pulse_width) == 0:
+        #     return self._pulse_width
+        # else:
+        #     self._pulse_width = int(pulse_width[0])
+        #     reg = self.REG_CHN + self.channel
+        #     self.i2c_write(reg, self._pulse_width)
+        return 0    
 
     def pulse_width_percent(self, *pulse_width_percent):
         global timer
