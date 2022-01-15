@@ -109,65 +109,66 @@ class Picarx(object):
             self.cali_dir_value[motor] = -1 * self.cali_dir_value[motor]
         self.config_flie.set("picarx_dir_motor", self.cali_dir_value)
 
-    @log_on_start (logging.DEBUG, "Message when function starts")
-    @log_on_error (logging.DEBUG, "Message when function encounters an error before completing")
-    @log_on_end (logging.DEBUG, "Message when function ends successfully")
+    @log_on_start(logging.DEBUG, "Message when function starts")
+    @log_on_error(logging.DEBUG, "Message when function encounters an error before completing")
+    @log_on_end(logging.DEBUG, "Message when function ends successfully")
     def dir_servo_angle_calibration(self, value):
         # global dir_cal_value
         self.dir_cal_value = value
         # print("calibrationdir_cal_value:", self.dir_cal_value)
+        logging.debug("calibrationdir_cal_value:", self.dir_cal_value)
         self.config_flie.set("picarx_dir_servo", "%s" % value)
         self.dir_servo_pin.angle(value)
 
-    @log_on_start (logging.DEBUG, "Message when function starts")
-    @log_on_error (logging.DEBUG, "Message when function encounters an error before completing")
-    @log_on_end (logging.DEBUG, "Message when function ends successfully")
+    @log_on_start(logging.DEBUG, "Message when function starts")
+    @log_on_error(logging.DEBUG, "Message when function encounters an error before completing")
+    @log_on_end(logging.DEBUG, "Message when function ends successfully")
     def set_dir_servo_angle(self, value):
         # global dir_cal_value
         self.dir_current_angle = value
         angle_value = value + self.dir_cal_value
-        # print("angle_value:", angle_value)
-        # print("set_dir_servo_angle_1:",angle_value)
-        # print("set_dir_servo_angle_2:",dir_cal_value)
+        logging.debug("angle_value:", angle_value)
+        logging.debug("set_dir_servo_angle_1:",angle_value)
+        logging.debug("set_dir_servo_angle_2:",self.dir_cal_value)
         self.dir_servo_pin.angle(angle_value)
 
-    @log_on_start (logging.DEBUG, "Message when function starts")
-    @log_on_error (logging.DEBUG, "Message when function encounters an error before completing")
-    @log_on_end (logging.DEBUG, "Message when function ends successfully")
+    @log_on_start(logging.DEBUG, "Message when function starts")
+    @log_on_error(logging.DEBUG, "Message when function encounters an error before completing")
+    @log_on_end(logging.DEBUG, "Message when function ends successfully")
     def camera_servo1_angle_calibration(self, value):
         # global cam_cal_value_1
         self.cam_cal_value_1 = value
         self.config_flie.set("picarx_cam1_servo", "%s" % value)
-        # print("cam_cal_value_1:", self.cam_cal_value_1)
+        logging.debug("cam_cal_value_1:", self.cam_cal_value_1)
         self.camera_servo_pin1.angle(value)
 
-    @log_on_start (logging.DEBUG, "Message when function starts")
-    @log_on_error (logging.DEBUG, "Message when function encounters an error before completing")
-    @log_on_end (logging.DEBUG, "Message when function ends successfully")
+    @log_on_start(logging.DEBUG, "Message when function starts")
+    @log_on_error(logging.DEBUG, "Message when function encounters an error before completing")
+    @log_on_end(logging.DEBUG, "Message when function ends successfully")
     def camera_servo2_angle_calibration(self, value):
         # global cam_cal_value_2
         self.cam_cal_value_2 = value
         self.config_flie.set("picarx_cam2_servo", "%s" % value)
-        # print("picarx_cam2_servo:", self.cam_cal_value_2)
+        logging.debug("picarx_cam2_servo:", self.cam_cal_value_2)
         self.camera_servo_pin2.angle(value)
 
-    @log_on_start (logging.DEBUG, "Message when function starts")
-    @log_on_error (logging.DEBUG, "Message when function encounters an error before completing")
-    @log_on_end (logging.DEBUG, "Message when function ends successfully")
+    @log_on_start(logging.DEBUG, "Message when function starts")
+    @log_on_error(logging.DEBUG, "Message when function encounters an error before completing")
+    @log_on_end(logging.DEBUG, "Message when function ends successfully")
     def set_camera_servo1_angle(self, value):
         # global cam_cal_value_1
         self.camera_servo_pin1.angle(-1*(value + -1*self.cam_cal_value_1))
-        # print("self.cam_cal_value_1:",self.cam_cal_value_1)
-        # print((value + self.cam_cal_value_1))
+        logging.debug("self.cam_cal_value_1:",self.cam_cal_value_1)
+        logging.debug((value + self.cam_cal_value_1))
 
-    @log_on_start (logging.DEBUG, "Message when function starts")
-    @log_on_error (logging.DEBUG, "Message when function encounters an error before completing")
-    @log_on_end (logging.DEBUG, "Message when function ends successfully")
+    @log_on_start(logging.DEBUG, "Message when function starts")
+    @log_on_error(logging.DEBUG, "Message when function encounters an error before completing")
+    @log_on_end(logging.DEBUG, "Message when function ends successfully")
     def set_camera_servo2_angle(self, value):
         # global cam_cal_value_2
         self.camera_servo_pin2.angle(-1*(value + -1*self.cam_cal_value_2))
-        # print("self.cam_cal_value_2:",self.cam_cal_value_2)
-        # print((value + self.cam_cal_value_2))
+        logging.debug("self.cam_cal_value_2:",self.cam_cal_value_2)
+        logging.debug((value + self.cam_cal_value_2))
 
     def get_adc_value(self):
         adc_value_list = []
@@ -188,7 +189,7 @@ class Picarx(object):
             if abs_current_angle > 40:
                 abs_current_angle = 40
             # power_scale = (100 - abs_current_angle) / 100.0
-            # print("power_scale:", power_scale)
+            logging.debug("power_scale:", power_scale)
             # if (current_angle / abs_current_angle) > 0:
             #     self.set_motor_speed(1, -1*speed)
             #     self.set_motor_speed(2, speed * power_scale)
@@ -210,7 +211,7 @@ class Picarx(object):
             if abs_current_angle > 40:
                 abs_current_angle = 40
             # power_scale = (100 - abs_current_angle) / 100.0
-            # print("power_scale:", power_scale)
+            logging.debug("power_scale:", power_scale)
             # if (current_angle / abs_current_angle) > 0:
             #     self.set_motor_speed(1, speed)
             #     self.set_motor_speed(2, -1*speed * power_scale)
@@ -219,7 +220,7 @@ class Picarx(object):
             #     self.set_motor_speed(2, -1*speed)
             # We need the ratio of the width and length of the
             # car to get an accurate estimate of the speed ratio
-            # speed ratio is defined as 1-(w/l)*tan(theta) where w is the width of the car, 
+            # speed ratio is defined as 1-(w/l)*tan(theta) where w is the width of the car,
             # l is the length of the car and theta is the steering angle
             ratio = 1-1.3*math.tan(current_angle)
             self.set_motor_speed(1, speed)
@@ -256,13 +257,13 @@ class Picarx(object):
                 return -2
         during = pulse_end - pulse_start
         cm = round(during * 340 / 2 * 100, 2)
-        # print(cm)
+        logging.debug(cm)
         return cm
 
     def move_forward(self, speed, angle, time=1):
         self.set_dir_servo_angle(angle)
         stop_time = time.time()+time
-        while time.time()<stop_time:
+        while time.time() < stop_time:
             self.forward(speed)
 
     def k_turn(self, speed):
@@ -273,14 +274,11 @@ class Picarx(object):
         self.move_forward(speed, 1, 45)
 
     def parallel_parking(self, speed):
-        self.move_forward(speed, 1, 0) 
+        self.move_forward(speed, 1, 0)
         time.sleep(0.01)
         self.move_forward(-speed, 1, 30)
         time.sleep(0.01)
-        self.move_forward(-speed, 1, -30)       
-
-
-        
+        self.move_forward(-speed, 1, -30)
 
 
 if __name__ == "__main__":
