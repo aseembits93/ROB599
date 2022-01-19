@@ -1,4 +1,6 @@
 import time
+import sys
+sys.path.append(r'/home/aseem/picar-x/lib')
 from picarx_improved import Picarx
 
 

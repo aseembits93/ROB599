@@ -1,11 +1,17 @@
 import atexit
 from datetime import datetime
 import time
+import sys
+sys.path.append(r'/home/aseem/picar-x/lib')
 
 try:
-    from ezblock import *
-    from ezblock import __reset_mcu__
-    __reset_mcu__()
+    from servo import Servo 
+    from pwm import PWM
+    from pin import Pin
+    from adc import ADC
+    from filedb import fileDB
+    from utils import reset_mcu
+    reset_mcu()
     time.sleep(0.01)
 except ImportError:
     print("This computer does not appear to be a PiCar - X system (ezblock is not present ) . Shadowing hardware calls with substitute functions")
@@ -13,9 +19,9 @@ except ImportError:
 
 import logging
 from logdecorator import log_on_start, log_on_end, log_on_error
-logging_format = "%( asctime ) s : %( message ) s "
-logging.basicConfig(format=logging_format,
-                    level=logging . INFO, datefmt="% H :% M :% S ")
+# logging_format = "%( asctime ) s : %( message ) s "
+# logging.basicConfig(format=logging_format,
+#                     level=logging . INFO, datefmt="% H :% M :% S ")
 logging.getLogger().setLevel(logging.DEBUG)
 # use the following lines before def function calls
 # @log_on_start (logging.DEBUG, "Message when function starts")
@@ -64,7 +70,6 @@ class Picarx(object):
                                for i in self.cali_dir_value.strip("[]").split(",")]
         self.cali_speed_value = [0, 0]
         self.dir_current_angle = 0
-        # 初始化PWM引脚
         for pin in self.motor_speed_pins:
             pin.period(self.PERIOD)
             pin.prescaler(self.PRESCALER)
@@ -189,7 +194,7 @@ class Picarx(object):
             if abs_current_angle > 40:
                 abs_current_angle = 40
             # power_scale = (100 - abs_current_angle) / 100.0
-            logging.debug("power_scale:", power_scale)
+            # logging.debug("power_scale:", power_scale)
             # if (current_angle / abs_current_angle) > 0:
             #     self.set_motor_speed(1, -1*speed)
             #     self.set_motor_speed(2, speed * power_scale)
@@ -211,7 +216,7 @@ class Picarx(object):
             if abs_current_angle > 40:
                 abs_current_angle = 40
             # power_scale = (100 - abs_current_angle) / 100.0
-            logging.debug("power_scale:", power_scale)
+            # logging.debug("power_scale:", power_scale)
             # if (current_angle / abs_current_angle) > 0:
             #     self.set_motor_speed(1, speed)
             #     self.set_motor_speed(2, -1*speed * power_scale)
