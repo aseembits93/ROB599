@@ -1,11 +1,15 @@
+from logdecorator import log_on_start, log_on_end, log_on_error
+import logging
 import atexit
 from datetime import datetime
 import time
 import sys
-sys.path.append(r'/home/aseem/picar-x/lib')
+# change this path manually
+sys.path.append(r'/home/aseem/Downloads/intro2/ROB599/lib')
 
+# Uncomment the following lines if you want to run on pi
 try:
-    from servo import Servo 
+    from servo import Servo
     from pwm import PWM
     from pin import Pin
     from adc import ADC
@@ -13,15 +17,13 @@ try:
     from utils import reset_mcu
     reset_mcu()
     time.sleep(0.01)
-except ImportError:
+except Exception as e:
     print("This computer does not appear to be a PiCar - X system (ezblock is not present ) . Shadowing hardware calls with substitute functions")
     from sim_ezblock import *
 
-import logging
-from logdecorator import log_on_start, log_on_end, log_on_error
-# logging_format = "%( asctime ) s : %( message ) s "
-# logging.basicConfig(format=logging_format,
-#                     level=logging . INFO, datefmt="% H :% M :% S ")
+logging_format = "%(asctime)s:%(message)s"
+logging.basicConfig(format=logging_format,
+                    level=logging.INFO, datefmt="%H:%M:%S")
 logging.getLogger().setLevel(logging.DEBUG)
 # use the following lines before def function calls
 # @log_on_start (logging.DEBUG, "Message when function starts")
@@ -132,9 +134,9 @@ class Picarx(object):
         # global dir_cal_value
         self.dir_current_angle = value
         angle_value = value + self.dir_cal_value
-        logging.debug("angle_value:", angle_value)
-        logging.debug("set_dir_servo_angle_1:",angle_value)
-        logging.debug("set_dir_servo_angle_2:",self.dir_cal_value)
+        logging.debug("angle_value:%f", angle_value)
+        logging.debug("set_dir_servo_angle_1:%f", angle_value)
+        logging.debug("set_dir_servo_angle_2:%f", self.dir_cal_value)
         self.dir_servo_pin.angle(angle_value)
 
     @log_on_start(logging.DEBUG, "Message when function starts")
@@ -144,7 +146,7 @@ class Picarx(object):
         # global cam_cal_value_1
         self.cam_cal_value_1 = value
         self.config_flie.set("picarx_cam1_servo", "%s" % value)
-        logging.debug("cam_cal_value_1:", self.cam_cal_value_1)
+        logging.debug("cam_cal_value_1:%f", self.cam_cal_value_1)
         self.camera_servo_pin1.angle(value)
 
     @log_on_start(logging.DEBUG, "Message when function starts")
@@ -154,7 +156,7 @@ class Picarx(object):
         # global cam_cal_value_2
         self.cam_cal_value_2 = value
         self.config_flie.set("picarx_cam2_servo", "%s" % value)
-        logging.debug("picarx_cam2_servo:", self.cam_cal_value_2)
+        logging.debug("picarx_cam2_servo:%f", self.cam_cal_value_2)
         self.camera_servo_pin2.angle(value)
 
     @log_on_start(logging.DEBUG, "Message when function starts")
@@ -163,7 +165,7 @@ class Picarx(object):
     def set_camera_servo1_angle(self, value):
         # global cam_cal_value_1
         self.camera_servo_pin1.angle(-1*(value + -1*self.cam_cal_value_1))
-        logging.debug("self.cam_cal_value_1:",self.cam_cal_value_1)
+        logging.debug("self.cam_cal_value_1:%f", self.cam_cal_value_1)
         logging.debug((value + self.cam_cal_value_1))
 
     @log_on_start(logging.DEBUG, "Message when function starts")
@@ -172,7 +174,7 @@ class Picarx(object):
     def set_camera_servo2_angle(self, value):
         # global cam_cal_value_2
         self.camera_servo_pin2.angle(-1*(value + -1*self.cam_cal_value_2))
-        logging.debug("self.cam_cal_value_2:",self.cam_cal_value_2)
+        logging.debug("self.cam_cal_value_2:%f", self.cam_cal_value_2)
         logging.debug((value + self.cam_cal_value_2))
 
     def get_adc_value(self):
@@ -209,6 +211,12 @@ class Picarx(object):
             self.set_motor_speed(2, speed)
 
     def forward(self, speed):
+        '''
+        We need the ratio of the width and length of the
+        car to get an accurate estimate of the speed ratio
+        speed ratio is defined as 1-(w/l)*tan(theta) where w is the width of the car,
+        l is the length of the car and theta is the steering angle
+        '''
         current_angle = self.dir_current_angle
         if current_angle != 0:
             abs_current_angle = abs(current_angle)
@@ -223,10 +231,7 @@ class Picarx(object):
             # else:
             #     self.set_motor_speed(1, speed * power_scale)
             #     self.set_motor_speed(2, -1*speed)
-            # We need the ratio of the width and length of the
-            # car to get an accurate estimate of the speed ratio
-            # speed ratio is defined as 1-(w/l)*tan(theta) where w is the width of the car,
-            # l is the length of the car and theta is the steering angle
+            
             ratio = 1-1.3*math.tan(current_angle)
             self.set_motor_speed(1, speed)
             self.set_motor_speed(2, -1*ratio*speed)
@@ -264,26 +269,6 @@ class Picarx(object):
         cm = round(during * 340 / 2 * 100, 2)
         logging.debug(cm)
         return cm
-
-    def move_forward(self, speed, angle, time=1):
-        self.set_dir_servo_angle(angle)
-        stop_time = time.time()+time
-        while time.time() < stop_time:
-            self.forward(speed)
-
-    def k_turn(self, speed):
-        self.move_forward(speed, 1, 45)
-        time.sleep(0.01)
-        self.move_forward(-speed, 1, -45)
-        time.sleep(0.01)
-        self.move_forward(speed, 1, 45)
-
-    def parallel_parking(self, speed):
-        self.move_forward(speed, 1, 0)
-        time.sleep(0.01)
-        self.move_forward(-speed, 1, 30)
-        time.sleep(0.01)
-        self.move_forward(-speed, 1, -30)
 
 
 if __name__ == "__main__":
