@@ -12,4 +12,4 @@ if __name__ == "__main__":
     # Stop the bot
     px.stop()
     # See now how much the car deviated, for example, it's 2 degrees
-    px.motor_direction_calibration(2)
+    px.motor_direction_calibration(0,1)
