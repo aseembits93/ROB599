@@ -9,7 +9,7 @@ from random import uniform
 from time import sleep
 import numpy as np
 
-class LineSensor(object):
+class LineSensor:
     '''
     Sensor Class for interfacing with the grayscale sensor
     '''
@@ -132,8 +132,8 @@ class LineUltraController:
             print("Stopping Car!")
             self.picar.stop()
 
-
-def main():
+if __name__ == "__main__":
+    
     # Sensor/Controller definitions
     line_sensor = LineSensor()
     line_controller = LineController()
@@ -141,15 +141,15 @@ def main():
     ultrasonic_controller = UltrasonicController()
     line_ultra_controller = LineUltraController()
 
-    #timer as mentioned in the course manual
-    timer = Timer(timer_bus, 20, 0.01, timer_bus)
-
     #Bus definitions
     timer_bus = Bus(False, "Timer Bus")
     line_bus = Bus(0.5, "Line Bus")
     ultra_bus = Bus(100, "Ultra Bus")
     angle_bus = Bus(0.0, "Angle Bus")
     
+    #timer as mentioned in the course manual
+    timer = Timer(timer_bus, 20, 0.01, timer_bus)
+
     #Producer definitions
     produce_line = Producer(line_sensor.get_grayscale_data, line_bus, timer_bus, name="Line Sensor")
     produce_ultra = Producer(ultrasonic_sensor.read, ultra_bus, timer_bus, name="Ultra Sensor")
@@ -171,6 +171,3 @@ def main():
         [produce_line, consume_line, produce_ultra, consume_ultra, run_car, timer]
     )
 
-
-if __name__ == "__main__":
-    main()
